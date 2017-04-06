@@ -14,10 +14,15 @@
 library(spsann)
 library(rgeos)
 library(xlsx)
-#install.packages("devtools")
+#library(RCurl)
+library(devtools)
 #devtools::install_github("samuel-rosa/spsann")
 
-my_data <- read.table("https://github.com/heuner/stem_density/blob/master/data/kraut_cand.txt", header=TRUE, sep=";", dec=".", encoding="utf-8")
+#load data
+setwd("E:/tibass/data/stem_density/data")
+getwd()
+my_data<-read.table("kraut_cand.txt", header=TRUE, sep=";")
+
 head(my_data)
 boundary <- my_data
 
@@ -66,4 +71,4 @@ plot(res, boundary = boundary)
 #Export table
 
 #write.xlsx(res$points, "https://github.com/heuner/stem_density/blob/master/results/sampleKraut.xlsx") 
-write.table(res$points, "https://github.com/heuner/stem_density/blob/master/results/sampleKraut.txt", sep=";")
+#write.table(res$points, "https://github.com/heuner/stem_density/blob/master/results/sampleKraut.txt", sep=";")
