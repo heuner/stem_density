@@ -1,4 +1,4 @@
 # stem_density
 
-==== README ====
+README 
 more details in the *.R-script
