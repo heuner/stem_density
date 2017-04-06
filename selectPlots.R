@@ -4,7 +4,7 @@
 #purpose: SamplingDesign StemDensity, random Selection
 #         using install_github("samuel-rosa/spsann")
 
-#Author: M. Heuner, A. Samuel-rosa
+#Authors: M. Heuner, A. Samuel-rosa
 #Date:06.04.2017
 #version:0.9
 ##########################################
@@ -17,7 +17,7 @@ library(xlsx)
 #install.packages("devtools")
 #devtools::install_github("samuel-rosa/spsann")
 
-my_data<-read.table("https://github.com/heuner/stem_density/data/kraut_cand.txt", header=TRUE)
+my_data<-read.table("https://github.com/heuner/stem_density/blob/master/data/kraut_cand.txt", header=TRUE)
 head(my_data)
 boundary <- my_data
 
@@ -65,5 +65,5 @@ plot(res, boundary = boundary)
 
 #Export table
 
-#write.xlsx(res$points, "https://github.com/heuner/stem_density/results/sampleKraut.xlsx") 
-write.table(res$points, "https://github.com/heuner/stem_density/results/sampleKraut.txt", sep=";")
+#write.xlsx(res$points, "https://github.com/heuner/stem_density/blob/master/results/sampleKraut.xlsx") 
+write.table(res$points, "https://github.com/heuner/stem_density/blob/master/results/sampleKraut.txt", sep=";")
