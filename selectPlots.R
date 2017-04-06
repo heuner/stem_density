@@ -17,7 +17,7 @@ library(xlsx)
 #install.packages("devtools")
 #devtools::install_github("samuel-rosa/spsann")
 
-my_data<-read.table("https://github.com/heuner/stem_density/blob/master/data/kraut_cand.txt", header=TRUE, sep=";", encoding="latin1",quote="",comment="",colClasses=rep("character",8))
+my_data <- read.table("https://github.com/heuner/stem_density/blob/master/data/kraut_cand.txt", header=TRUE, sep=";", dec=".", encoding="utf-8")
 head(my_data)
 boundary <- my_data
 
