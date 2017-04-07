@@ -4,7 +4,7 @@
 #purpose: SamplingDesign StemDensity, random Selection
 #         using install_github("samuel-rosa/spsann")
 
-#Authors: M. Heuner, A. Samuel-rosa
+#Authors: M. Heuner, A. Samuel-Rosa
 #Date:06.04.2017
 #version:0.9
 ##########################################
@@ -28,7 +28,8 @@ my_data <- read.table("data/kraut_cand.txt", header=TRUE, sep=";")
 head(my_data, 16) # ASR: The first 15 lines contain the fixed points.
 boundary <- my_data[-c(1:15), ]
 
-plot(my_data[, 2:3], asp = 1, col = my_data$SampleArt)
+plot(my_data[, 2:3], asp = 1, pch = 15, col = c("green", "darkgreen")[as.integer(my_data$Veg)])
+points(my_data[1:15, 2:3], pch = 3)
 # ASR: I do not understand this. I thought that the fixed points were inside the area where you were going to 
 #      sample. But I only see seven points in the area with red circles. Is this correct?
 #MH: Yes, that is true. That was why I would like to also sample plant properties from the outside points on the
@@ -78,6 +79,9 @@ res <- optimDIST(
 objSPSANN(res)
 objDIST(points = res, candi = candi, covars = covars)
 plot(res, boundary = boundary)
+
+plot(my_data[, 2:3], asp = 1, pch = 15, col = c("green", "darkgreen")[as.integer(my_data$Veg)])
+points(res$points[, 2:3], pch = c(3, 1)[res$points$free + 1])
 
 dev.off()
 png("res/fig/optim.png", width = 480 * 2)
