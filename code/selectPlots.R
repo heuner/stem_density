@@ -55,16 +55,19 @@ plot(my_data[, 2:3], asp = 1, col = my_data$SampleArt)
 #fix(data)
 # ASR: Do not use the fixed points as candidate locations.
 candi <- my_data[16:nrow(my_data), 2:3]
-covars <- my_data[16:nrow(my_data), 6:8]
+covars <- my_data[16:nrow(my_data), c(2:3, 6:8)] # ASR: Explicitly include the coordinates as covariates.
 schedule <- scheduleSPSANN(initial.temperature = 5, stopping = 200)
 free <- 22 # ASR: This is the number of additional points.
 
-# id <- sample(1:nrow(candi), 40)
+# Fixed points
+fixed <- cbind(id = 1:15, my_data[1:15, c(2:3, 6:8)])
+id <- SpatialTools::dist2(coords2 = as.matrix(fixed[, 2:3]), coords1 = as.matrix(candi))
+id <- apply(id, 2, which.min)
+plot(my_data[, 2:3], asp = 1, col = my_data$SampleArt)
+points(candi[id, ], pch = 20)
+objDIST(points = id, candi = candi, covars = covars)
 
-# id <- candi[1:15,]
-# fixed <- as.numeric(row.names(id))
-# fixed <- cbind(id, candi[id, ])
-objDIST(points = fixed, candi = candi, covars = covars, use.coords = TRUE)
+# Optimization
 set.seed(2001)
 res <- optimDIST(
   points = list(free = free, fixed = fixed), candi = candi, covars = covars, use.coords = TRUE, 
