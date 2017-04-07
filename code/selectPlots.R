@@ -26,7 +26,7 @@ library(devtools)
 my_data <- read.table("data/kraut_cand.txt", header=TRUE, sep=";")
 
 head(my_data, 16) # ASR: The first 15 lines contain the fixed points.
-boundary <- my_data
+boundary <- my_data[-c(1:15), ]
 
 plot(my_data[, 2:3], asp = 1, col = my_data$SampleArt)
 # ASR: I do not understand this. I thought that the fixed points were inside the area where you were going to 
@@ -44,12 +44,11 @@ plot(my_data[, 2:3], asp = 1, col = my_data$SampleArt)
 # ASR: The 'boundary' argument is only necessary for plotting, i.e. if you set 'plotit = TRUE'. spsann can 
 # estimate the 'boundary' from 'candi', but I imagine that you have a polygon, drawn on a satellite image,
 # that indicates the boundaries of the study area.
-# sp::coordinates(boundary) <- c("x", "y")
-# str(boundary)
 # Should it be gridded?
-# sp::gridded(boundary) <- TRUE
+sp::gridded(boundary) <- c("x", "y")
+str(boundary)
 # Disolve ploygones, here not nescessary
-# boundary <- rgeos::gUnaryUnion(as(boundary, "SpatialPolygons"))
+boundary <- rgeos::gUnaryUnion(as(boundary, "SpatialPolygons"))
 
 # determining variables
 #fix(data)
@@ -60,9 +59,13 @@ schedule <- scheduleSPSANN(initial.temperature = 5, stopping = 200)
 free <- 22 # ASR: This is the number of additional points.
 
 # Fixed points
-fixed <- cbind(id = 1:15, my_data[1:15, c(2:3, 6:8)])
-id <- SpatialTools::dist2(coords2 = as.matrix(fixed[, 2:3]), coords1 = as.matrix(candi))
+fixed <- my_data[1:15, 2:3]
+id <- SpatialTools::dist2(coords2 = as.matrix(fixed), coords1 = as.matrix(candi))
 id <- apply(id, 2, which.min)
+fixed <- cbind(id, fixed)
+# ASR: spsann assumes that all fixed points are within the boundaries of the study area. Thus, the covariate
+#      values asssociated to the fixed points do not matter because they will be sampled from the nearest 
+#      candidate point.
 plot(my_data[, 2:3], asp = 1, col = my_data$SampleArt)
 points(candi[id, ], pch = 20)
 objDIST(points = id, candi = candi, covars = covars)
@@ -70,11 +73,16 @@ objDIST(points = id, candi = candi, covars = covars)
 # Optimization
 set.seed(2001)
 res <- optimDIST(
-  points = list(free = free, fixed = fixed), candi = candi, covars = covars, use.coords = TRUE, 
+  points = list(free = free, fixed = fixed), candi = candi, covars = covars, 
   schedule = schedule, plotit = TRUE, boundary = boundary)
 objSPSANN(res)
-objDIST(points = res, candi = candi, covars = covars, use.coords = TRUE)
+objDIST(points = res, candi = candi, covars = covars)
 plot(res, boundary = boundary)
+
+dev.off()
+png("res/fig/optim.pdf")
+plot(res, boundary = boundary)
+dev.off()
 
 #Export table
 
