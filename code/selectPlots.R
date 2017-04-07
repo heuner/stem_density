@@ -80,7 +80,7 @@ objDIST(points = res, candi = candi, covars = covars)
 plot(res, boundary = boundary)
 
 dev.off()
-png("res/fig/optim.pdf")
+png("res/fig/optim.png", width = 480 * 2)
 plot(res, boundary = boundary)
 dev.off()
 
