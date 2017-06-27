@@ -1,0 +1,210 @@
+> library(spsann)
+> library(rgeos)
+> library(xlsx)
+> library(RCurl)
+> library(devtools)
+> my_data_holl <- read.table("data/holl_cand.txt", header=TRUE, sep="")
+> fix(my_data_holl)
+> head(my_data_holl, 12) # MH: The first 11 lines contain the fixed points in Hollerwettern.
+   ObjectID        x       y SampleArt Veg Btty z2010        Dist
+1         1 32524418 5965019     fixed  Bo    2  0.78 50.71753698
+2         2 32524373 5965000     fixed  Sc    1  0.26  5.24681707
+3         3 32524389 5964974     fixed  Sc    1  0.19  6.39630096
+4         4 32524423 5964931     fixed  Sc    1  0.11 12.20098466
+5         5 32524434 5964981     fixed  Bo    2  0.53 40.40623340
+6         6 32524530 5964926     fixed  Bo    2  0.69 49.04517788
+7         7 32524452 5964900     fixed  Sc    1  0.01  0.07312961
+8         8 32524457 5964909     fixed  Sc    1  0.15 10.75208366
+9         9 32524464 5964918     fixed  Bo    2  0.27 21.20850414
+10       10 32524468 5964926     fixed  Bo    2  0.37 27.98264018
+11       11 32524480 5965002     fixed  Bo    2  0.87 75.69325167
+12       12 32524412 5965076       pot  Bo    2  1.05 90.37214608
+> boundary_h <- my_data_holl[-c(1:11), ]
+> plot(my_data_holl[, 2:3], asp = 1, pch = 15, col = c("darkseagreen3","darkgreen")[as.integer(my_data_holl$Veg)])
+> points(my_data_holl[1:12, 2:3], pch = 3)
+> sp::gridded(boundary_h) <- c("x", "y")
+> boundary <- rgeos::gUnaryUnion(as(boundary_h, "SpatialPolygons"))
+> candi <- my_data_holl[12:nrow(my_data_holl), 2:3]
+> covars <- my_data_holl[12:nrow(my_data_holl), c(2:3, 6:8)] # ASR: Explicitly include the coordinates as covariates.
+> schedule <- scheduleSPSANN(initial.temperature = 5, stopping = 200, chain.length = 1, chains = 1000)
+> free <- 32 # ASR: This is the number of additional points.
+> fixed <- my_data_holl[1:11, 2:3]
+> id <- SpatialTools::dist2(coords2 = as.matrix(fixed), coords1 = as.matrix(candi))
+> id<- apply(id, 2, which.min)
+> fixed <- cbind(id, fixed)
+> plot(my_data_holl[, 2:3], asp = 1, col = my_data_holl$SampleArt)
+> points(candi[id, ], pch = 20)
+> objDIST(points = id, candi = candi, covars = covars)
+[1] 2.750733
+> set.seed(71)
+> res <- optimDIST(
++   points = list(free = free, fixed = fixed), candi = candi, covars = covars, 
++   schedule = schedule, plotit = TRUE, boundary = boundary)
+estimating jittering parameters from 'candi'...
+  |                                                                                                                |   0%
+97% of acceptance in the 1st chain
+  |================================================================================================================| 100%
+running time = 3.57 minutes
+> objSPSANN(res)
+       obj
+ 0.9150469
+> objDIST(points = res, candi = candi, covars = covars)
+[1] 0.9150469
+> png("res/fig/optim_holl_1000_1.png", width = 480*2)
+> plot(res, boundary = boundary)
+> dev.off()
+RStudioGD 
+        2 
+> png("res/fig/optim_holl_1000_1_b.png", width = 480)
+> plot(my_data_holl[, 2:3], asp = 1, pch = 15, col = c("darkseagreen3", "darkgreen")[as.integer(my_data_holl$Veg)])
+> points(res$points[, 2:3], pch = c(3, 1)[res$points$free + 1])
+> dev.off()
+RStudioGD 
+        2 
+> set.seed(72)
+> res <- optimDIST(
++   points = list(free = free, fixed = fixed), candi = candi, covars = covars, 
++   schedule = schedule, plotit = TRUE, boundary = boundary)
+estimating jittering parameters from 'candi'...
+  |                                                                                                                |   0%
+100% of acceptance in the 1st chain
+  |================================================================================================================| 100%
+running time = 3.54 minutes
+> objSPSANN(res)
+       obj
+ 0.9587852
+> objDIST(points = res, candi = candi, covars = covars)
+[1] 0.9587852
+> png("res/fig/optim_holl_1000_1rep.png", width = 480*2)
+> plot(res, boundary = boundary)
+> dev.off()
+RStudioGD 
+        2 
+> png("res/fig/optim_holl_1000_1_brep.png", width = 480)
+> plot(my_data_holl[, 2:3], asp = 1, pch = 15, col = c("darkseagreen3", "darkgreen")[as.integer(my_data_holl$Veg)])
+> points(res$points[, 2:3], pch = c(3, 1)[res$points$free + 1])
+> dev.off()
+RStudioGD 
+        2 
+> set.seed(73)
+> 
+> res <- optimDIST(
++   points = list(free = free, fixed = fixed), candi = candi, covars = covars, 
++   schedule = schedule, plotit = TRUE, boundary = boundary)
+estimating jittering parameters from 'candi'...
+  |                                                                                                                |   0%
+97% of acceptance in the 1st chain
+  |================================================================================================================| 100%
+running time = 3.59 minutes
+> objSPSANN(res)
+       obj
+ 0.9130919
+> objDIST(points = res, candi = candi, covars = covars)
+[1] 0.9130919
+> png("res/fig/optim_holl_1000_1rep2.png", width = 480*2)
+> plot(res, boundary = boundary)
+> dev.off()
+RStudioGD 
+        2 
+> 
+> png("res/fig/optim_holl_1000_1_brep2.png", width = 480)
+> plot(my_data_holl[, 2:3], asp = 1, pch = 15, col = c("darkseagreen3", "darkgreen")[as.integer(my_data_holl$Veg)])
+> points(res$points[, 2:3], pch = c(3, 1)[res$points$free + 1])
+> dev.off()
+RStudioGD 
+        2 
+> candi <- my_data_holl[12:nrow(my_data_holl), 2:3]
+> covars <- my_data_holl[12:nrow(my_data_holl), c(2:3, 6:8)] # ASR: Explicitly include the coordinates as covariates.
+> schedule <- scheduleSPSANN(initial.temperature = 5, stopping = 300, chain.length = 1, chains = 1000)
+> free <- 32 # ASR: This is the number of additional points.
+> fixed <- my_data_holl[1:11, 2:3]
+> id <- SpatialTools::dist2(coords2 = as.matrix(fixed), coords1 = as.matrix(candi))
+> id<- apply(id, 2, which.min)
+> fixed <- cbind(id, fixed)
+> plot(my_data_holl[, 2:3], asp = 1, col = my_data_holl$SampleArt)
+> points(candi[id, ], pch = 20)
+> objDIST(points = id, candi = candi, covars = covars)
+[1] 2.750733
+> set.seed(74)
+> res <- optimDIST(
++   points = list(free = free, fixed = fixed), candi = candi, covars = covars, 
++   schedule = schedule, plotit = TRUE, boundary = boundary)
+estimating jittering parameters from 'candi'...
+  |                                                                                                                |   0%
+100% of acceptance in the 1st chain
+  |================================================================================================================| 100%
+running time = 3.57 minutes
+> objSPSANN(res)
+       obj
+ 0.8888131
+> objDIST(points = res, candi = candi, covars = covars)
+[1] 0.8888131
+> png("res/fig/optim_holl_1000_1Stop300rep3.png", width = 480*2)
+> plot(res, boundary = boundary)
+> dev.off()
+RStudioGD 
+        2 
+> png("res/fig/optim_holl_1000_1Stop300_brep3.png", width = 480)
+> plot(my_data_holl[, 2:3], asp = 1, pch = 15, col = c("darkseagreen3", "darkgreen")[as.integer(my_data_holl$Veg)])
+> points(res$points[, 2:3], pch = c(3, 1)[res$points$free + 1])
+> dev.off()
+RStudioGD 
+        2 
+> schedule <- scheduleSPSANN(initial.temperature = 5, stopping = 200, chain.length = 1, chains = 1500)
+> free <- 32 # ASR: This is the number of additional points.
+> fixed <- my_data_holl[1:11, 2:3]
+> id <- SpatialTools::dist2(coords2 = as.matrix(fixed), coords1 = as.matrix(candi))
+> id<- apply(id, 2, which.min)
+> fixed <- cbind(id, fixed)
+> plot(my_data_holl[, 2:3], asp = 1, col = my_data_holl$SampleArt)
+> points(candi[id, ], pch = 20)
+> objDIST(points = id, candi = candi, covars = covars)
+[1] 2.750733
+> set.seed(75)
+> res <- optimDIST(
++   points = list(free = free, fixed = fixed), candi = candi, covars = covars, 
++   schedule = schedule, plotit = TRUE, boundary = boundary)
+estimating jittering parameters from 'candi'...
+  |                                                                                                                |   0%
+100% of acceptance in the 1st chain
+  |================================================================================================================| 100%
+running time = 7.2 minutes
+> objSPSANN(res)
+       obj
+ 0.8466207
+> objDIST(points = res, candi = candi, covars = covars)
+[1] 0.8466207
+> png("res/fig/optim_holl_1500_1rep3.png", width = 480*2)
+> plot(res, boundary = boundary)
+> dev.off()
+windows 
+     12 
+> png("res/fig/optim_holl_1500_1_brep3.png", width = 480)
+> plot(my_data_holl[, 2:3], asp = 1, pch = 15, col = c("darkseagreen3", "darkgreen")[as.integer(my_data_holl$Veg)])
+> points(res$points[, 2:3], pch = c(3, 1)[res$points$free + 1])
+> dev.off()
+windows 
+     12 
+> set.seed(76)
+> res <- optimDIST(
++   points = list(free = free, fixed = fixed), candi = candi, covars = covars, 
++   schedule = schedule, plotit = TRUE, boundary = boundary)
+estimating jittering parameters from 'candi'...
+  |                                                                                                                |   0%
+100% of acceptance in the 1st chain
+  |================================================================================================================| 100%
+running time = 7.24 minutes
+> objSPSANN(res)
+       obj
+ 0.9294596
+> objDIST(points = res, candi = candi, covars = covars)
+[1] 0.9294596
+> png("res/fig/optim_holl_1500_1rep.png", width = 480*2)
+> plot(res, boundary = boundary)
+> dev.off()
+windows 
+     12 
+> png("res/fig/optim_holl_1500_1_brep.png", width = 480)
+> plot(my_data_holl[, 2:3], asp = 1, pch = 15, col = c("darkseagreen3", "darkgreen")[as.integer(my_data_holl$Veg)])
+> points(res$points[, 2:3], pch = c(3, 1)[res$points$free + 1])
+> dev.off()
